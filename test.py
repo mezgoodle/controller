@@ -241,11 +241,19 @@ class Setpoint(Coordinator):
         return randint(1, 3)
 
 
-s1 = Setpoint("config.json", 0, "data_queue.npy")
-s2 = Setpoint("config.json", 1, "test_data2.npy")
-s3 = Setpoint("config.json", 2, "test_data3.npy")
+s1 = Setpoint("config.json", 0, "data_queue1.npy")
+s2 = Setpoint("config.json", 1, "data_queue2.npy")
+s3 = Setpoint("config.json", 2, "data_queue3.npy")
+s4 = Setpoint("config.json", 3, "data_queue4.npy")
 while True:
     from time import sleep
 
+    print("For the first")
     s1.receive_data(0)
-    sleep(3)
+    print("For the second")
+    s2.receive_data(0)
+    print("For the third")
+    s3.receive_data(0)
+    print("For the fourth")
+    s4.receive_data(0)
+    sleep(1)

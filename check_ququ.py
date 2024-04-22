@@ -6,7 +6,6 @@ import qdarkstyle
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QApplication,
-    QLabel,
     QMainWindow,
     QSizePolicy,
     QTableWidget,
@@ -18,10 +17,14 @@ from PyQt5.QtWidgets import (
 
 
 class QueueVisualization(QMainWindow):
-    def __init__(self, filename):
+    def __init__(self, file_prefix, num_files):
         super().__init__()
-        self.filename = filename
-        self.last_modified_time = os.path.getmtime(filename)
+        self.file_prefix = file_prefix
+        self.num_files = num_files
+        self.last_modified_times = [
+            os.path.getmtime(f"{self.file_prefix}{i+1}.npy")
+            for i in range(num_files)
+        ]
         self.initUI()
 
     def initUI(self):
@@ -35,28 +38,22 @@ class QueueVisualization(QMainWindow):
         self.tabs = QTabWidget()
         self.layout.addWidget(self.tabs)
 
-        # Перша вкладка з поточною логікою
-        self.tab1 = QWidget()
-        self.tabs.addTab(self.tab1, "Логіка")
-
-        self.initLogicTab()
-
-        # Друга вкладка з текстом
-        self.tab2 = QWidget()
-        self.tabs.addTab(self.tab2, "Просто текст")
-
-        self.initTextTab()
+        # Створення вкладок для кожного файлу
+        for i in range(self.num_files):
+            file_name = f"{self.file_prefix}{i+1}.npy"
+            tab = QWidget()
+            self.tabs.addTab(tab, f"Файл {i+1}")
+            self.initTab(tab, file_name)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_file_changes)
         self.timer.start(1000)  # Час у мілісекундах
-        self.load_queue()
 
-    def initLogicTab(self):
+    def initTab(self, tab, filename):
         layout = QVBoxLayout()
-        self.tableWidget = QTableWidget()
-        self.tableWidget.setRowCount(5)
-        self.tableWidget.setVerticalHeaderLabels(
+        tableWidget = QTableWidget()
+        tableWidget.setRowCount(5)
+        tableWidget.setVerticalHeaderLabels(
             [
                 "current_states",
                 "desired_states",
@@ -65,19 +62,17 @@ class QueueVisualization(QMainWindow):
                 "environment_state",
             ]
         )
-        layout.addWidget(self.tableWidget)
-        self.tab1.setLayout(layout)
+        layout.addWidget(tableWidget)
+        tab.setLayout(layout)
 
-    def initTextTab(self):
-        layout = QVBoxLayout()
-        label = QLabel("Це друга вкладка з просто текстом.")
-        layout.addWidget(label)
-        self.tab2.setLayout(layout)
+        self.load_queue(tableWidget, filename)
 
-    def load_queue(self):
-        with open(self.filename, "rb") as f:
+    def load_queue(self, tableWidget, filename):
+        with open(filename, "rb") as f:
             data_list = np.load(f, allow_pickle=True)
-            self.tableWidget.setColumnCount(len(data_list))
+            tableWidget.setColumnCount(
+                len(data_list[0])
+            )  # Fixing the issue here
             for current_column_count, data in enumerate(data_list):
                 num_parts = int(data[-2])
                 current_states = data[:num_parts]
@@ -85,43 +80,51 @@ class QueueVisualization(QMainWindow):
                 input_x = data[2 * num_parts : 3 * num_parts]
                 previous_setpoints = data[3 * num_parts : 4 * num_parts]
                 environment_state = data[-1]
-                self.tableWidget.setItem(
+                tableWidget.setItem(
                     0,
                     current_column_count,
                     QTableWidgetItem(str(current_states)),
                 )
-                self.tableWidget.setItem(
+                tableWidget.setItem(
                     1,
                     current_column_count,
                     QTableWidgetItem(str(desired_states)),
                 )
-                self.tableWidget.setItem(
+                tableWidget.setItem(
                     2, current_column_count, QTableWidgetItem(str(input_x))
                 )
-                self.tableWidget.setItem(
+                tableWidget.setItem(
                     3,
                     current_column_count,
                     QTableWidgetItem(str(previous_setpoints)),
                 )
-                self.tableWidget.setItem(
+                tableWidget.setItem(
                     4,
                     current_column_count,
                     QTableWidgetItem(str(environment_state)),
                 )
 
-        # Встановлюємо політику розміру
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # Встановлення політики розміру
+        tableWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def check_file_changes(self):
-        current_modified_time = os.path.getmtime(self.filename)
-        if current_modified_time != self.last_modified_time:
-            self.last_modified_time = current_modified_time
-            self.load_queue()
+        for i in range(self.num_files):
+            current_modified_time = os.path.getmtime(
+                f"{self.file_prefix}{i+1}.npy"
+            )
+            if current_modified_time != self.last_modified_times[i]:
+                self.last_modified_times[i] = current_modified_time
+                tableWidget = (
+                    self.tabs.widget(i).layout().itemAt(0).widget()
+                )  # Fixing the issue here
+                self.load_queue(tableWidget, f"{self.file_prefix}{i+1}.npy")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())
-    ex = QueueVisualization("data_queue.npy")
+    ex = QueueVisualization(
+        "data_queue", 4
+    )  # Замініть 4 на кількість файлів, які вам потрібно відобразити
     ex.show()
     sys.exit(app.exec_())
