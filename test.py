@@ -1,10 +1,15 @@
 import json
 import queue
 import struct
+import sys
 from abc import ABC, abstractmethod
 from random import randint
 
 import numpy as np
+from loguru import logger
+
+logger.remove(0)
+logger.add("loguru.log", format="{time} | {message} dasdasd")
 
 
 class Coordinator(ABC):
@@ -26,6 +31,11 @@ class Coordinator(ABC):
             self.num_parts,
         ), "Розмірності матриці взаємодії не співпадають"
 
+        logger.info(
+            ":".join(
+                [f"Coordinator-{coordinator_index}", "Proccess-Initialized"]
+            )
+        )
         # Індекс координатора
         self.coordinator_index = coordinator_index
 
@@ -94,10 +104,13 @@ class Coordinator(ABC):
         with open(self.filename, "wb") as f:
             data_list = list(self.data_queue.queue)
             np.save(f, data_list)
+        with open(self.filename, "rb") as f:
+            data_list = np.load(f, allow_pickle=True)
+            print(data_list)
 
     def temp_get_data(self):
         data = np.zeros(4 * self.num_parts + 2)
-        data[self.coordinator_index] = int(input("Enter current state: "))
+        data[self.coordinator_index] = int(input("Enter desired state: "))
         data[-1] = int(input("Enter environment state: "))
         data[-2] = self.num_parts
         return data
@@ -228,9 +241,11 @@ class Setpoint(Coordinator):
         return randint(1, 3)
 
 
-s = Setpoint("config.json", 0, "test_data.npy")
+s1 = Setpoint("config.json", 0, "data_queue.npy")
+s2 = Setpoint("config.json", 1, "test_data2.npy")
+s3 = Setpoint("config.json", 2, "test_data3.npy")
 while True:
     from time import sleep
 
-    s.receive_data(0)
+    s1.receive_data(0)
     sleep(3)
