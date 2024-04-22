@@ -6,7 +6,11 @@ import qdarkstyle
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QApplication,
+    QDialog,
+    QLabel,
+    QLineEdit,
     QMainWindow,
+    QPushButton,
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
@@ -29,6 +33,7 @@ class QueueVisualization(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Queue Visualization")
+        self.showFullScreen()  # Відображення на повний екран
 
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
@@ -38,11 +43,20 @@ class QueueVisualization(QMainWindow):
         self.tabs = QTabWidget()
         self.layout.addWidget(self.tabs)
 
+        # Створення кнопки
+        self.button = QPushButton("Зробити ітерацію", self)
+        self.button.setGeometry(50, 50, 200, 50)
+
+        # Прикріплення обробника події до кнопки
+        self.button.clicked.connect(self.openForm)
+
+        self.layout.addWidget(self.button)
+
         # Створення вкладок для кожного файлу
         for i in range(self.num_files):
             file_name = f"{self.file_prefix}{i+1}.npy"
             tab = QWidget()
-            self.tabs.addTab(tab, f"Файл {i+1}")
+            self.tabs.addTab(tab, f"Координатор {i+1}")
             self.initTab(tab, file_name)
 
         self.timer = QTimer()
@@ -118,6 +132,43 @@ class QueueVisualization(QMainWindow):
                     self.tabs.widget(i).layout().itemAt(0).widget()
                 )  # Fixing the issue here
                 self.load_queue(tableWidget, f"{self.file_prefix}{i+1}.npy")
+
+    def openForm(self):
+        # Створення та відображення форми
+        self.form = FormDialog(self)
+        self.form.show()
+
+
+class FormDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle("Форма введення даних")
+        self.setGeometry(300, 300, 300, 150)
+
+        layout = QVBoxLayout()
+
+        # Додавання елементів форми (наприклад, текстового поля та кнопки)
+        self.label = QLabel("Введіть стан навколишнього середовища:", self)
+        layout.addWidget(self.label)
+
+        self.line_edit = QLineEdit(self)
+        layout.addWidget(self.line_edit)
+
+        self.submit_button = QPushButton("Підтвердити", self)
+        print(self.line_edit.text())
+        self.submit_button.clicked.connect(self.submitForm)
+        layout.addWidget(self.submit_button)
+
+        self.setLayout(layout)
+
+    def submitForm(self):
+        # Отримання даних з поля введення
+        entered_text = self.line_edit.text()
+        print("Введені дані:", entered_text)
+
+        # Закриття форми
+        self.close()
 
 
 if __name__ == "__main__":

@@ -104,9 +104,9 @@ class Coordinator(ABC):
         with open(self.filename, "wb") as f:
             data_list = list(self.data_queue.queue)
             np.save(f, data_list)
-        with open(self.filename, "rb") as f:
-            data_list = np.load(f, allow_pickle=True)
-            print(data_list)
+        # with open(self.filename, "rb") as f:
+        #     data_list = np.load(f, allow_pickle=True)
+        #     print(data_list)
 
     def temp_get_data(self):
         data = np.zeros(4 * self.num_parts + 2)
