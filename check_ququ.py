@@ -32,10 +32,9 @@ class QueueVisualization(QMainWindow):
         self.setWindowTitle("Queue Visualization")
         self.resize(800, 300)
 
-        self.centralWidget = QWidget()
-        self.setCentralWidget(self.centralWidget)
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
 
-        self.layout = QVBoxLayout(self.centralWidget)
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(5)
         self.tableWidget.setVerticalHeaderLabels(
@@ -47,8 +46,9 @@ class QueueVisualization(QMainWindow):
                 "environment_state",
             ]
         )
-        self.layout.addWidget(self.tableWidget)
-        self.setLayout(self.layout)
+        self.tab_widget.addTab(self.tableWidget, "Черга")
+        self.form_tab = FormTab()
+        self.tab_widget.addTab(self.form_tab, "Форма")
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_file_changes)
@@ -124,6 +124,7 @@ class FormTab(QWidget):
         name = self.input_name.text()
         age = self.input_age.text()
         # ... (збереження даних)
+        print(f"Name: {name}, Age: {age}")
 
 
 if __name__ == "__main__":
