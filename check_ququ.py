@@ -127,9 +127,51 @@ class FormTab(QWidget):
         print(f"Name: {name}, Age: {age}")
 
 
+class InputForm(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Введіть шлях до файлу")
+        self.layout = QVBoxLayout()
+        self.label = QLabel("Введіть шлях до файлу:")
+        self.input_path = QLineEdit()
+        self.button = QPushButton("Продовжити")
+        self.error_label = QLabel(
+            ""
+        )  # Мітка для виведення повідомлення про помилку
+        self.error_label.setStyleSheet(
+            "color: red;"
+        )  # Червоний колір для повідомлення про помилку
+
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.input_path)
+        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.error_label)  # Додаємо мітку для помилки
+        self.setLayout(self.layout)
+
+        self.button.clicked.connect(self.check_file)  # Змінюємо обробник події
+
+    def check_file(self):
+        file_path = self.input_path.text()
+        self.filename = file_path
+        if os.path.isfile(file_path):
+            self.accept()  # Закриває форму, якщо файл існує
+        else:
+            self.error_label.setText(
+                "Файл не знайдено!"
+            )  # Повідомлення про помилку
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())
-    ex = QueueVisualization("data_queue.npy")
-    ex.show()
-    sys.exit(app.exec_())
+
+    # Показати форму введення тексту
+    input_form = InputForm()
+    if input_form.exec_() == QDialog.Accepted:
+        text = input_form.filename
+        # ... (використати введений текст, наприклад, передати його в QueueVisualization)
+
+        # Запустити головне вікно
+        ex = QueueVisualization("data_queue.npy")
+        ex.show()
+        sys.exit(app.exec_())
