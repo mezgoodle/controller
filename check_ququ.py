@@ -1,5 +1,8 @@
 import os
+import queue
 import sys
+import time
+from random import randint
 
 import numpy as np
 import qdarkstyle
@@ -159,6 +162,34 @@ class InputForm(QDialog):
             self.error_label.setText(
                 "Файл не знайдено!"
             )  # Повідомлення про помилку
+
+
+class QueueSimulation:
+    def save_queue(data_queue, filename):
+        with open(filename, "wb") as f:
+            data_list = list(data_queue.queue)
+            np.save(f, data_list)
+
+    def __init__(self):
+        self.max_queue_size = 4
+        self.data_queue = queue.Queue(maxsize=self.max_queue_size)
+
+    def start_simulation(self, data_queue):
+        while True:
+            num_parts = 4
+            current_state = randint(1, 10)
+            desired_state = randint(1, 10)
+            environment_state = randint(1, 10)
+            initial_data = np.zeros(2 * num_parts + 4)
+            initial_data[0] = current_state
+            initial_data[1] = desired_state
+            initial_data[2] = num_parts
+            initial_data[3] = environment_state
+            data_queue.put(initial_data)
+            self.save_queue(data_queue, "data_queue.npy")
+            if data_queue.qsize() == self.max_queue_size:
+                data_queue.get()
+            time.sleep(2)
 
 
 if __name__ == "__main__":
