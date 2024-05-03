@@ -1,3 +1,4 @@
+import json
 import os
 import queue
 import sys
@@ -174,18 +175,25 @@ class QueueSimulation:
             data_list = list(data_queue.queue)
             np.save(f, data_list)
 
+    @staticmethod
+    def read_config(filename):
+        with open(filename, "r") as f:
+            config = json.load(f)
+        return config
+
     def __init__(self, filename, config):
-        self.max_queue_size = 4
+        config_data = self.read_config(config)
+        self.max_queue_size = config_data["num_parts"]
         self.filename = filename
         self.data_queue = queue.Queue(maxsize=self.max_queue_size)
 
     def start_simulation(self):
         # while True:
-        num_parts = 4
+        num_parts = self.max_queue_size
         current_state = randint(1, 10)
         desired_state = randint(1, 10)
         environment_state = randint(1, 10)
-        initial_data = np.zeros(2 * num_parts + 4)
+        initial_data = np.zeros(2 * num_parts + self.max_queue_size)
         initial_data[0] = current_state
         initial_data[1] = desired_state
         initial_data[2] = num_parts
