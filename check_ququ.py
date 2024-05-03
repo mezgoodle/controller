@@ -29,9 +29,9 @@ class QueueVisualization(QMainWindow):
         super().__init__()
         self.filename = filename
         self.last_modified_time = os.path.getmtime(filename)
-        self.initUI()
         self.simul = self.QueueSimulation(filename, config)
-        self.simul.start_simulation()
+        self.simul.simulate()
+        self.initUI()
 
     def initUI(self):
 
@@ -53,7 +53,7 @@ class QueueVisualization(QMainWindow):
             ]
         )
         self.tab_widget.addTab(self.tableWidget, "Черга")
-        self.form_tab = self.FormTab()
+        self.form_tab = self.FormTab(self.simul)
         self.tab_widget.addTab(self.form_tab, "Форма")
 
         self.timer = QTimer()
@@ -102,9 +102,10 @@ class QueueVisualization(QMainWindow):
             self.load_queue()
 
     class FormTab(QWidget):
-        def __init__(self):
+        def __init__(self, simul_object):
             super().__init__()
             self.layout = QVBoxLayout()
+            self.simul = simul_object
 
             # Додавання елементів форми (приклад)
             self.first_label = QLabel("Бажаний стан:")
@@ -129,6 +130,7 @@ class QueueVisualization(QMainWindow):
             self.button_save.clicked.connect(self.make_a_step)
 
         def make_a_step(self):
+            print(self.simul.__dir__)
             # Обробка збереження даних з форми
             name = self.input_name.text()
             age = self.input_age.text()
@@ -153,12 +155,18 @@ class QueueVisualization(QMainWindow):
             self.filename = filename
             self.data_queue = queue.Queue(maxsize=self.max_queue_size)
 
-        def start_simulation(self):
+        def simulate(
+            self,
+            current_state=0,
+            desired_state=0,
+            environment_state=0,
+            other_states=[],
+        ):
             # while True:
             num_parts = self.max_queue_size
-            current_state = randint(1, 10)
-            desired_state = randint(1, 10)
-            environment_state = randint(1, 10)
+            current_state = current_state or randint(1, 10)
+            desired_state = desired_state or randint(1, 10)
+            environment_state = environment_state or randint(1, 10)
             initial_data = np.zeros(2 * num_parts + self.max_queue_size)
             initial_data[0] = current_state
             initial_data[1] = desired_state
