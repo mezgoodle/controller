@@ -105,16 +105,20 @@ class FormTab(QWidget):
         self.layout = QVBoxLayout()
 
         # Додавання елементів форми (приклад)
-        self.label_name = QLabel("Ім'я:")
-        self.input_name = QLineEdit()
-        self.label_age = QLabel("Вік:")
-        self.input_age = QLineEdit()
+        self.first_label = QLabel("Бажаний стан:")
+        self.first = QLineEdit()
+        self.second_label = QLabel("Стан інших координаторів(через кому):")
+        self.second = QLineEdit()
+        self.third_label = QLabel("Стан навколишнього середовища")
+        self.third = QLineEdit()
         self.button_save = QPushButton("Зберегти")
 
-        self.layout.addWidget(self.label_name)
-        self.layout.addWidget(self.input_name)
-        self.layout.addWidget(self.label_age)
-        self.layout.addWidget(self.input_age)
+        self.layout.addWidget(self.first_label)
+        self.layout.addWidget(self.first)
+        self.layout.addWidget(self.second_label)
+        self.layout.addWidget(self.second)
+        self.layout.addWidget(self.third_label)
+        self.layout.addWidget(self.third)
         self.layout.addWidget(self.button_save)
 
         self.setLayout(self.layout)
@@ -165,44 +169,47 @@ class InputForm(QDialog):
 
 
 class QueueSimulation:
-    def save_queue(data_queue, filename):
-        with open(filename, "wb") as f:
+    def save_queue(self, data_queue):
+        with open(self.filename, "wb") as f:
             data_list = list(data_queue.queue)
             np.save(f, data_list)
 
-    def __init__(self):
+    def __init__(self, filename, config):
         self.max_queue_size = 4
+        self.filename = filename
         self.data_queue = queue.Queue(maxsize=self.max_queue_size)
 
-    def start_simulation(self, data_queue):
-        while True:
-            num_parts = 4
-            current_state = randint(1, 10)
-            desired_state = randint(1, 10)
-            environment_state = randint(1, 10)
-            initial_data = np.zeros(2 * num_parts + 4)
-            initial_data[0] = current_state
-            initial_data[1] = desired_state
-            initial_data[2] = num_parts
-            initial_data[3] = environment_state
-            data_queue.put(initial_data)
-            self.save_queue(data_queue, "data_queue.npy")
-            if data_queue.qsize() == self.max_queue_size:
-                data_queue.get()
-            time.sleep(2)
+    def start_simulation(self):
+        # while True:
+        num_parts = 4
+        current_state = randint(1, 10)
+        desired_state = randint(1, 10)
+        environment_state = randint(1, 10)
+        initial_data = np.zeros(2 * num_parts + 4)
+        initial_data[0] = current_state
+        initial_data[1] = desired_state
+        initial_data[2] = num_parts
+        initial_data[3] = environment_state
+        self.data_queue.put(initial_data)
+        self.save_queue(self.data_queue)
+        if self.data_queue.qsize() == self.max_queue_size:
+            self.data_queue.get()
+        time.sleep(2)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())
+    data_filename = "data_queue.npy"
 
     # Показати форму введення тексту
     input_form = InputForm()
     if input_form.exec_() == QDialog.Accepted:
-        text = input_form.filename
+        config = input_form.filename
         # ... (використати введений текст, наприклад, передати його в QueueVisualization)
-
+        s = QueueSimulation(data_filename, config)
+        s.start_simulation()
         # Запустити головне вікно
-        ex = QueueVisualization("data_queue.npy")
+        ex = QueueVisualization(data_filename)
         ex.show()
         sys.exit(app.exec_())
