@@ -25,11 +25,13 @@ from PyQt5.QtWidgets import (
 
 
 class QueueVisualization(QMainWindow):
-    def __init__(self, filename):
+    def __init__(self, filename, config):
         super().__init__()
         self.filename = filename
         self.last_modified_time = os.path.getmtime(filename)
         self.initUI()
+        self.simul = self.QueueSimulation(filename, config)
+        self.simul.start_simulation()
 
     def initUI(self):
 
@@ -124,9 +126,9 @@ class QueueVisualization(QMainWindow):
             self.setLayout(self.layout)
 
             # Додавання обробників подій (за потреби)
-            self.button_save.clicked.connect(self.save_data)
+            self.button_save.clicked.connect(self.make_a_step)
 
-        def save_data(self):
+        def make_a_step(self):
             # Обробка збереження даних з форми
             name = self.input_name.text()
             age = self.input_age.text()
@@ -212,9 +214,7 @@ if __name__ == "__main__":
     input_form = InputForm()
     if input_form.exec_() == QDialog.Accepted:
         config = input_form.filename
-        ex = QueueVisualization(data_filename)
-        s = ex.QueueSimulation(data_filename, config)
-        s.start_simulation()
+        ex = QueueVisualization(data_filename, config)
         # Запустити головне вікно
         ex.show()
         sys.exit(app.exec_())
