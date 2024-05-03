@@ -51,7 +51,7 @@ class QueueVisualization(QMainWindow):
             ]
         )
         self.tab_widget.addTab(self.tableWidget, "Черга")
-        self.form_tab = FormTab()
+        self.form_tab = self.FormTab()
         self.tab_widget.addTab(self.form_tab, "Форма")
 
         self.timer = QTimer()
@@ -99,40 +99,74 @@ class QueueVisualization(QMainWindow):
             self.last_modified_time = current_modified_time
             self.load_queue()
 
+    class FormTab(QWidget):
+        def __init__(self):
+            super().__init__()
+            self.layout = QVBoxLayout()
 
-class FormTab(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.layout = QVBoxLayout()
+            # Додавання елементів форми (приклад)
+            self.first_label = QLabel("Бажаний стан:")
+            self.first = QLineEdit()
+            self.second_label = QLabel("Стан інших координаторів(через кому):")
+            self.second = QLineEdit()
+            self.third_label = QLabel("Стан навколишнього середовища")
+            self.third = QLineEdit()
+            self.button_save = QPushButton("Зберегти")
 
-        # Додавання елементів форми (приклад)
-        self.first_label = QLabel("Бажаний стан:")
-        self.first = QLineEdit()
-        self.second_label = QLabel("Стан інших координаторів(через кому):")
-        self.second = QLineEdit()
-        self.third_label = QLabel("Стан навколишнього середовища")
-        self.third = QLineEdit()
-        self.button_save = QPushButton("Зберегти")
+            self.layout.addWidget(self.first_label)
+            self.layout.addWidget(self.first)
+            self.layout.addWidget(self.second_label)
+            self.layout.addWidget(self.second)
+            self.layout.addWidget(self.third_label)
+            self.layout.addWidget(self.third)
+            self.layout.addWidget(self.button_save)
 
-        self.layout.addWidget(self.first_label)
-        self.layout.addWidget(self.first)
-        self.layout.addWidget(self.second_label)
-        self.layout.addWidget(self.second)
-        self.layout.addWidget(self.third_label)
-        self.layout.addWidget(self.third)
-        self.layout.addWidget(self.button_save)
+            self.setLayout(self.layout)
 
-        self.setLayout(self.layout)
+            # Додавання обробників подій (за потреби)
+            self.button_save.clicked.connect(self.save_data)
 
-        # Додавання обробників подій (за потреби)
-        self.button_save.clicked.connect(self.save_data)
+        def save_data(self):
+            # Обробка збереження даних з форми
+            name = self.input_name.text()
+            age = self.input_age.text()
+            # ... (збереження даних)
+            print(f"Name: {name}, Age: {age}")
 
-    def save_data(self):
-        # Обробка збереження даних з форми
-        name = self.input_name.text()
-        age = self.input_age.text()
-        # ... (збереження даних)
-        print(f"Name: {name}, Age: {age}")
+    class QueueSimulation:
+        def save_queue(self, data_queue):
+            with open(self.filename, "wb") as f:
+                data_list = list(data_queue.queue)
+                np.save(f, data_list)
+
+        @staticmethod
+        def read_config(filename):
+            with open(filename, "r") as f:
+                config = json.load(f)
+            return config
+
+        def __init__(self, filename, config):
+            config_data = self.read_config(config)
+            self.max_queue_size = config_data["num_parts"]
+            self.filename = filename
+            self.data_queue = queue.Queue(maxsize=self.max_queue_size)
+
+        def start_simulation(self):
+            # while True:
+            num_parts = self.max_queue_size
+            current_state = randint(1, 10)
+            desired_state = randint(1, 10)
+            environment_state = randint(1, 10)
+            initial_data = np.zeros(2 * num_parts + self.max_queue_size)
+            initial_data[0] = current_state
+            initial_data[1] = desired_state
+            initial_data[2] = num_parts
+            initial_data[3] = environment_state
+            self.data_queue.put(initial_data)
+            self.save_queue(self.data_queue)
+            if self.data_queue.qsize() == self.max_queue_size:
+                self.data_queue.get()
+            # time.sleep(2)
 
 
 class InputForm(QDialog):
@@ -169,42 +203,6 @@ class InputForm(QDialog):
             )  # Повідомлення про помилку
 
 
-class QueueSimulation:
-    def save_queue(self, data_queue):
-        with open(self.filename, "wb") as f:
-            data_list = list(data_queue.queue)
-            np.save(f, data_list)
-
-    @staticmethod
-    def read_config(filename):
-        with open(filename, "r") as f:
-            config = json.load(f)
-        return config
-
-    def __init__(self, filename, config):
-        config_data = self.read_config(config)
-        self.max_queue_size = config_data["num_parts"]
-        self.filename = filename
-        self.data_queue = queue.Queue(maxsize=self.max_queue_size)
-
-    def start_simulation(self):
-        # while True:
-        num_parts = self.max_queue_size
-        current_state = randint(1, 10)
-        desired_state = randint(1, 10)
-        environment_state = randint(1, 10)
-        initial_data = np.zeros(2 * num_parts + self.max_queue_size)
-        initial_data[0] = current_state
-        initial_data[1] = desired_state
-        initial_data[2] = num_parts
-        initial_data[3] = environment_state
-        self.data_queue.put(initial_data)
-        self.save_queue(self.data_queue)
-        if self.data_queue.qsize() == self.max_queue_size:
-            self.data_queue.get()
-        time.sleep(2)
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())
@@ -214,10 +212,9 @@ if __name__ == "__main__":
     input_form = InputForm()
     if input_form.exec_() == QDialog.Accepted:
         config = input_form.filename
-        # ... (використати введений текст, наприклад, передати його в QueueVisualization)
-        s = QueueSimulation(data_filename, config)
+        ex = QueueVisualization(data_filename)
+        s = ex.QueueSimulation(data_filename, config)
         s.start_simulation()
         # Запустити головне вікно
-        ex = QueueVisualization(data_filename)
         ex.show()
         sys.exit(app.exec_())
