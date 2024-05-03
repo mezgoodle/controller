@@ -108,20 +108,24 @@ class QueueVisualization(QMainWindow):
             self.simul = simul_object
 
             # Додавання елементів форми (приклад)
-            self.first_label = QLabel("Бажаний стан:")
-            self.first = QLineEdit()
-            self.second_label = QLabel("Стан інших координаторів(через кому):")
-            self.second = QLineEdit()
-            self.third_label = QLabel("Стан навколишнього середовища")
-            self.third = QLineEdit()
+            self.desired_state_label = QLabel("Бажаний стан:")
+            self.desired_state = QLineEdit()
+            self.other_coordinators_label = QLabel(
+                "Стан інших координаторів(через кому):"
+            )
+            self.other_coordinators = QLineEdit()
+            self.environment_state_label = QLabel(
+                "Стан навколишнього середовища"
+            )
+            self.environment_state = QLineEdit()
             self.button_save = QPushButton("Зберегти")
 
-            self.layout.addWidget(self.first_label)
-            self.layout.addWidget(self.first)
-            self.layout.addWidget(self.second_label)
-            self.layout.addWidget(self.second)
-            self.layout.addWidget(self.third_label)
-            self.layout.addWidget(self.third)
+            self.layout.addWidget(self.desired_state_label)
+            self.layout.addWidget(self.desired_state)
+            self.layout.addWidget(self.other_coordinators_label)
+            self.layout.addWidget(self.other_coordinators)
+            self.layout.addWidget(self.environment_state_label)
+            self.layout.addWidget(self.environment_state)
             self.layout.addWidget(self.button_save)
 
             self.setLayout(self.layout)
@@ -130,12 +134,16 @@ class QueueVisualization(QMainWindow):
             self.button_save.clicked.connect(self.make_a_step)
 
         def make_a_step(self):
-            print(self.simul.__dir__)
             # Обробка збереження даних з форми
-            name = self.input_name.text()
-            age = self.input_age.text()
-            # ... (збереження даних)
-            print(f"Name: {name}, Age: {age}")
+            desired_state = self.desired_state.text()
+            environment_state = self.environment_state.text()
+            other_coordinators = self.other_coordinators.text()
+            # ... checks
+            self.simul.simulate(
+                desired_state=desired_state,
+                environment_state=environment_state,
+                other_states=other_coordinators.split(","),
+            )
 
     class QueueSimulation:
         def save_queue(self, data_queue):
