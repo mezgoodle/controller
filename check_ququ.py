@@ -53,7 +53,7 @@ class QueueVisualization(QMainWindow):
             ]
         )
         self.tab_widget.addTab(self.tableWidget, "Черга")
-        self.form_tab = self.FormTab(self.simul)
+        self.form_tab = self.FormTab(self.simul, self.filename)
         self.tab_widget.addTab(self.form_tab, "Форма")
 
         self.timer = QTimer()
@@ -102,10 +102,11 @@ class QueueVisualization(QMainWindow):
             self.load_queue()
 
     class FormTab(QWidget):
-        def __init__(self, simul_object):
+        def __init__(self, simul_object, filename):
             super().__init__()
             self.layout = QVBoxLayout()
             self.simul = simul_object
+            self.filename = filename
 
             # Додавання елементів форми (приклад)
             self.desired_state_label = QLabel("Бажаний стан:")
@@ -134,12 +135,17 @@ class QueueVisualization(QMainWindow):
             self.button_save.clicked.connect(self.make_a_step)
 
         def make_a_step(self):
+            last_current_state = None
+            with open(self.filename, "rb") as f:
+                data_list = np.load(f, allow_pickle=True)
+                last_current_state = data_list[-1][0]
             # Обробка збереження даних з форми
             desired_state = self.desired_state.text()
             environment_state = self.environment_state.text()
             other_coordinators = self.other_coordinators.text()
             # ... checks
             self.simul.simulate(
+                current_state=last_current_state,
                 desired_state=desired_state,
                 environment_state=environment_state,
                 other_states=other_coordinators.split(","),
