@@ -206,6 +206,12 @@ class QueueVisualization(QMainWindow):
             environment_state=0,
             other_states=[],
         ):
+            if other_states and len(other_states) != self.max_queue_size - 1:
+                show_error_message(
+                    "Кількість інших координаторів не співпадає з розмірністю черги",
+                    False,
+                )
+                other_states = []
             # while True:
             if current_state:
                 current_state = (
