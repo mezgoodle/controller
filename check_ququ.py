@@ -2,7 +2,6 @@ import json
 import os
 import queue
 import sys
-import time
 from random import randint
 
 import numpy as np
@@ -59,8 +58,8 @@ class QueueVisualization(QMainWindow):
         self.tableWidget.setRowCount(5)
         self.tableWidget.setVerticalHeaderLabels(
             [
-                "real_states",
-                "desired_states",
+                "real_state",
+                "desired_state",
                 "input_x",
                 "setpoints",
                 "environment_state",
@@ -68,7 +67,9 @@ class QueueVisualization(QMainWindow):
         )
         self.tab_widget.addTab(self.tableWidget, "Черга")
         self.form_tab = self.FormTab(self.simul, self.filename)
-        self.tab_widget.addTab(self.form_tab, "Форма")
+        self.tab_widget.addTab(
+            self.form_tab, "Форма для введення даних інших контролерів"
+        )
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_file_changes)
@@ -133,7 +134,7 @@ class QueueVisualization(QMainWindow):
                 "Стан навколишнього середовища"
             )
             self.environment_state = QLineEdit()
-            self.button_save = QPushButton("Зберегти")
+            self.button_save = QPushButton("Підтвердити дані")
 
             self.layout.addWidget(self.desired_state_label)
             self.layout.addWidget(self.desired_state)
