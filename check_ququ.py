@@ -31,11 +31,14 @@ class QueueVisualization(QMainWindow):
         self.last_modified_time = os.path.getmtime(filename)
         self.simul = self.QueueSimulation(filename, config)
         self.simul.simulate()
+        self.wathced_index = self.simul.get_watched_index()
         self.initUI()
 
     def initUI(self):
 
-        self.setWindowTitle("Queue Visualization")
+        self.setWindowTitle(
+            f"Queue Visualization for controller {self.wathced_index}"
+        )
         self.resize(800, 300)
 
         self.tab_widget = QTabWidget()
@@ -167,7 +170,11 @@ class QueueVisualization(QMainWindow):
             config_data = self.read_config(config)
             self.max_queue_size = config_data["num_parts"]
             self.filename = filename
+            self.watched_index = randint(0, self.max_queue_size - 1) + 1
             self.data_queue = queue.Queue(maxsize=self.max_queue_size)
+
+        def get_watched_index(self):
+            return self.watched_index
 
         def simulate(
             self,
