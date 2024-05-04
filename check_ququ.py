@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QSizePolicy,
     QTableWidget,
@@ -22,6 +23,16 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+
+def show_error_message(message, to_exit=True):
+    error_dialog = QMessageBox()
+    error_dialog.setIcon(QMessageBox.Critical)
+    error_dialog.setText(message)
+    error_dialog.setWindowTitle("Помилка")
+    error_dialog.exec_()
+    if to_exit:
+        sys.exit(1)
 
 
 class QueueVisualization(QMainWindow):
@@ -169,6 +180,18 @@ class QueueVisualization(QMainWindow):
         def __init__(self, filename, config):
             config_data = self.read_config(config)
             self.max_queue_size = config_data["num_parts"]
+            if len(config_data["resource_vector"]) != config_data["num_parts"]:
+                show_error_message("Розмірності ресурсоємності не співпадають")
+            if (
+                len(config_data["influence_matrix"])
+                != config_data["num_parts"]
+            ) or (
+                len(config_data["influence_matrix"][0])
+                != config_data["num_parts"]
+            ):
+                show_error_message(
+                    "Розмірності матриці взаємодії не співпадають"
+                )
             self.filename = filename
             self.watched_index = randint(0, self.max_queue_size - 1) + 1
             self.data_queue = queue.Queue(maxsize=self.max_queue_size)
