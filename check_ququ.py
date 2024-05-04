@@ -180,6 +180,8 @@ class QueueVisualization(QMainWindow):
 
         def __init__(self, filename, config):
             config_data = self.read_config(config)
+            if "num_parts" not in config_data:
+                show_error_message("Не вказано кількість контролерів")
             self.max_queue_size = config_data["num_parts"]
             if len(config_data["resource_vector"]) != config_data["num_parts"]:
                 show_error_message("Розмірності ресурсоємності не співпадають")
