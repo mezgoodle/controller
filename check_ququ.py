@@ -146,9 +146,9 @@ class QueueVisualization(QMainWindow):
             # ... checks
             self.simul.simulate(
                 current_state=last_current_state,
-                desired_state=desired_state,
-                environment_state=environment_state,
-                other_states=other_coordinators.split(","),
+                desired_state=int(desired_state),
+                environment_state=int(environment_state),
+                other_states=list(map(int, other_coordinators.split(","))),
             )
 
     class QueueSimulation:
@@ -177,6 +177,10 @@ class QueueVisualization(QMainWindow):
             other_states=[],
         ):
             # while True:
+            if current_state:
+                current_state = (
+                    sum(other_states) + current_state + environment_state
+                ) / (len(other_states) + 2) + desired_state
             num_parts = self.max_queue_size
             current_state = current_state or randint(1, 10)
             desired_state = desired_state or randint(1, 10)
