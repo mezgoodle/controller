@@ -217,9 +217,16 @@ class QueueVisualization(QMainWindow):
                 other_states = []
             # while True:
             if current_state:
-                current_state = (
-                    sum(other_states) + current_state + environment_state
-                ) / (len(other_states) + 2) + desired_state
+                current_state = round(
+                    (
+                        sum(other_states)
+                        + current_state
+                        + environment_state
+                        + desired_state
+                    )
+                    / (len(other_states) + 3),
+                    2,
+                )
             num_parts = self.max_queue_size
             current_state = current_state or randint(1, 10)
             desired_state = desired_state or randint(1, 10)
@@ -239,6 +246,7 @@ class QueueVisualization(QMainWindow):
 class InputForm(QDialog):
     def __init__(self):
         super().__init__()
+        self.setGeometry(100, 100, 400, 150)  # x, y, ширина, висота
         self.setWindowTitle("Введіть шлях до файлу")
         self.layout = QVBoxLayout()
         self.label = QLabel("Введіть шлях до файлу:")
