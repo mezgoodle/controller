@@ -6,7 +6,7 @@ from random import randint
 
 import numpy as np
 import qdarkstyle
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
+    QToolBar,
     QVBoxLayout,
     QWidget,
 )
@@ -43,6 +44,17 @@ class QueueVisualization(QMainWindow):
         self.simul.simulate()
         self.wathced_index = self.simul.get_watched_index()
         self.initUI()
+        toolbar = QToolBar()
+        self.addToolBar(Qt.TopToolBarArea, toolbar)
+
+        # Створення мітки з інформацією
+        info_label = QLabel(
+            "Симулятор роботи контролера\nАвтори:\nДзюбенко Ярослав\nЗавальнюк Максим"
+        )
+        info_label.setStyleSheet(
+            "font-size: 14pt; color: white; font-weight: bold; padding: 5px; background-color: transparent;"
+        )
+        toolbar.addWidget(info_label)
 
     def initUI(self):
 
