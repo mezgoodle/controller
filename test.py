@@ -1,7 +1,6 @@
 import json
 import queue
 import struct
-import sys
 from abc import ABC, abstractmethod
 from random import randint
 
