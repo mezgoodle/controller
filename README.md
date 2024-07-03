@@ -1,0 +1,1 @@
+This project was developed for a competition. You can see the text [here](https://docs.google.com/document/d/1VomT5Q7Uh0xbwmrC7-0hRJ54xPZBi7KE/edit?usp=sharing&ouid=100048632578699398661&rtpof=true&sd=true) and the presentation [here](https://docs.google.com/presentation/d/1N4WA-Zvfc3Py7cWbsUMe1aXnRvSlZWk26WIikhmQhuk/edit?usp=sharing).
